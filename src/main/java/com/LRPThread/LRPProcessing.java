@@ -148,6 +148,7 @@ public class LRPProcessing implements Runnable {
 
 		HttpPost post;
 		URIBuilder builder;
+		HttpResponse response = null;
 		try {
 			client = HttpClientBuilder.create().build();
 
@@ -158,13 +159,15 @@ public class LRPProcessing implements Runnable {
 
 			StringEntity input = new StringEntity("");
 			post.setEntity(input);
-			HttpResponse response = client.execute(post);
+			response = client.execute(post);
 			HttpEntity entity = response.getEntity();
 			String tokenResponse = EntityUtils.toString(entity);
 			JSONObject jsonObject = new JSONObject(tokenResponse);
 			authToken = jsonObject.get("access_token").toString();
 		} catch (Exception e) {
 			e.printStackTrace();
+			HttpClientUtils.closeQuietly(response);
+			HttpClientUtils.closeQuietly(client);
 		}
 		return authToken;
 	}

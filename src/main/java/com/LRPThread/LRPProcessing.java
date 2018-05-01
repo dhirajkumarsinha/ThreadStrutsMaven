@@ -24,6 +24,41 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 public class LRPProcessing implements Runnable {
+	
+	String path;
+	Thread t;
+
+	LRPProcessing(String threadName) {
+		path = threadName;
+		t = new Thread(this, path);
+		System.out.println("New Thread : " + t);
+
+		t.start();
+	}
+	
+	public void run() {
+		try {
+			// process 500 at a time
+			int rowstart = 1;
+			int rowend = 500;
+			for (int i = 0; i < 20; i++) {
+				System.out.println("rowstart :" + rowstart + " #rowstart :" + rowend);
+				getUserIdFromExcel(path, rowstart, rowend);
+				rowstart = rowend + 1;
+				rowend = rowend + 500;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public static void main(String[] args) throws Exception {
+		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("prod"));
+		System.out.println(elementsToWrite.toString());
+		
+	}
 
 	public static String[] validateUserContext(String userId, String token) {
 		HttpClient client = null;
@@ -35,7 +70,7 @@ public class LRPProcessing implements Runnable {
 
 		try {
 			client = HttpClientBuilder.create().build();
-			// Build Read API URI
+			// Build API URI
 			URIBuilder uriBuilder = new URIBuilder();
 			uriBuilder.setScheme(scheme).setHost(host).setPath(path);
 			URI uri = uriBuilder.build();
@@ -83,7 +118,6 @@ public class LRPProcessing implements Runnable {
 			// e.printStackTrace();
 		}
 		return elements;
-
 	}
 
 	private static String getAuthtoken(String env) throws Exception {
@@ -153,41 +187,6 @@ public class LRPProcessing implements Runnable {
 		os.close();
 		workbook.close();
 		inputStream.close();
-	}
-
-	String path;
-	Thread t;
-
-	LRPProcessing(String threadName) {
-		path = threadName;
-		t = new Thread(this, path);
-		System.out.println("New Thread : " + t);
-
-		t.start();
-	}
-
-	public void run() {
-		try {
-			// process 500 at a time
-			int rowstart = 1;
-			int rowend = 500;
-			for (int i = 0; i < 20; i++) {
-				System.out.println("rowstart :" + rowstart + " #rowstart :" + rowend);
-				getUserIdFromExcel(path, rowstart, rowend);
-				rowstart = rowend + 1;
-				rowend = rowend + 500;
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-	
-	public static void main(String[] args) throws Exception {
-		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("prod"));
-		System.out.println(elementsToWrite.toString());
-		
 	}
 
 }

@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -24,7 +25,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 public class LRPProcessing implements Runnable {
-	
+
 	String path;
 	Thread t;
 
@@ -35,7 +36,7 @@ public class LRPProcessing implements Runnable {
 
 		t.start();
 	}
-	
+
 	public void run() {
 		try {
 			// process 1000 at a time
@@ -43,7 +44,7 @@ public class LRPProcessing implements Runnable {
 			int rowend = 14000;
 			for (int i = 0; i < 20; i++) {
 				System.out.println("rowstart :" + rowstart + " #rowstart :" + rowend);
-				test();//to check if the service is responding
+				test();// to check if the service is responding
 				getUserIdFromExcel(path, rowstart, rowend);
 				rowstart = rowend + 1;
 				rowend = rowend + 1000;
@@ -54,15 +55,16 @@ public class LRPProcessing implements Runnable {
 		}
 
 	}
-	
+
 	private static void test() throws Exception {
 		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("prod"));
 		System.out.println(elementsToWrite[0]);
-		
+
 	}
 
 	public static String[] validateUserContext(String userId, String token) {
 		HttpClient client = null;
+		HttpResponse response = null;
 		String scheme = "https";
 		String host = "api.cisco.com";
 		String path = "/software/csws/svc/services/context/fetch";
@@ -82,13 +84,16 @@ public class LRPProcessing implements Runnable {
 			request.addHeader("accept", "application/json");
 			request.addHeader("x-csw-requesting-user", userId);
 			// Response and parsing
-			HttpResponse response = client.execute(request);
+			response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			content = EntityUtils.toString(entity);
-			//System.out.println(content);
+			// System.out.println(content);
 			elements = parseContent(content);
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			HttpClientUtils.closeQuietly(response);
+			HttpClientUtils.closeQuietly(client);
 		}
 		return elements;
 	}

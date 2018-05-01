@@ -38,14 +38,15 @@ public class LRPProcessing implements Runnable {
 	
 	public void run() {
 		try {
-			// process 500 at a time
-			int rowstart = 1;
-			int rowend = 500;
+			// process 1000 at a time
+			int rowstart = 13001;
+			int rowend = 14000;
 			for (int i = 0; i < 20; i++) {
 				System.out.println("rowstart :" + rowstart + " #rowstart :" + rowend);
+				test();//to check if the service is responding
 				getUserIdFromExcel(path, rowstart, rowend);
 				rowstart = rowend + 1;
-				rowend = rowend + 500;
+				rowend = rowend + 1000;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -54,9 +55,9 @@ public class LRPProcessing implements Runnable {
 
 	}
 	
-	public static void main(String[] args) throws Exception {
+	private static void test() throws Exception {
 		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("prod"));
-		System.out.println(elementsToWrite.toString());
+		System.out.println(elementsToWrite[0]);
 		
 	}
 
@@ -84,7 +85,7 @@ public class LRPProcessing implements Runnable {
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			content = EntityUtils.toString(entity);
-			System.out.println(content);
+			//System.out.println(content);
 			elements = parseContent(content);
 		} catch (Exception e) {
 			e.printStackTrace();

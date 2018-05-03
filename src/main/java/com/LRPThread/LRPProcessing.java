@@ -166,6 +166,7 @@ public class LRPProcessing implements Runnable {
 			authToken = jsonObject.get("access_token").toString();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
 			HttpClientUtils.closeQuietly(response);
 			HttpClientUtils.closeQuietly(client);
 		}

@@ -57,7 +57,7 @@ public class LRPProcessing implements Runnable {
 	}
 
 	private static void test() throws Exception {
-		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("prod"));
+		String[] elementsToWrite = validateUserContext("dhisinha", getAuthtoken("stage"));
 		System.out.println(elementsToWrite[0]);
 
 	}
@@ -66,8 +66,8 @@ public class LRPProcessing implements Runnable {
 		HttpClient client = null;
 		HttpResponse response = null;
 		String scheme = "https";
-		String host = "api.cisco.com";
-		String path = "/software/csws/svc/services/context/fetch";
+		String host = "wsgx-dev.cisco.com";
+		String path = "/as/svo/restservices/viewOrder_sw2/88914052";
 		String content = null;
 		String[] elements = { "NA", "NA" };
 
@@ -76,13 +76,15 @@ public class LRPProcessing implements Runnable {
 			// Build API URI
 			URIBuilder uriBuilder = new URIBuilder();
 			uriBuilder.setScheme(scheme).setHost(host).setPath(path);
+			uriBuilder.setParameter("Requestedfor", "svorma8");
+			uriBuilder.setParameter("Requestedversion", "2");			
 			URI uri = uriBuilder.build();
-
 			// Http Get Request
 			HttpGet request = new HttpGet(uri);
-			request.addHeader("authorization", "Bearer " + token);
-			request.addHeader("accept", "application/json");
-			request.addHeader("x-csw-requesting-user", userId);
+			request.addHeader("Authorization", "Basic " + token);
+			request.addHeader("Content-type", "application/json");
+			//request.addHeader("accept",);
+			//request.addHeader("","");
 			// Response and parsing
 			response = client.execute(request);
 			HttpEntity entity = response.getEntity();
@@ -138,12 +140,12 @@ public class LRPProcessing implements Runnable {
 		String clientSecretKey = "client_secret";
 		if (env.equalsIgnoreCase("prod")) {
 			cloudSSOUrl = "https://cloudsso.cisco.com/as/token.oauth2";
-			clientId = "nkah74xtmxnayktcqddsqs3w";
-			clientSecret = "Q7vsTmWwRwfTqRGaR4MyBdaG";
+			clientId = "xyz";
+			clientSecret = "xyz";
 		} else if (env.equalsIgnoreCase("stage")) {
 			cloudSSOUrl = "https://cloudsso-test.cisco.com/as/token.oauth2";
-			clientId = "mumzqkammb5p8kj3z2s2h93m";
-			clientSecret = "Tgg7VtdG6ka6htxusBDhUQGU";
+			clientId = "xyz";
+			clientSecret = "xyz";
 		}
 
 		HttpPost post;
@@ -197,6 +199,37 @@ public class LRPProcessing implements Runnable {
 		os.close();
 		workbook.close();
 		inputStream.close();
+	}
+	
+	private static void getUserIdFromExcel(String excelFilePath) throws Exception {
+		Row row;
+		Cell cell;
+		FileInputStream inputStream = new FileInputStream(new File(excelFilePath));
+		Workbook workbook = new XSSFWorkbook(inputStream);
+		Sheet firstSheet = workbook.getSheetAt(0);
+		String[] elementsToWrite = { "NA", "NA" };
+		String token = getAuthtoken("prod");
+
+		
+			row = firstSheet.getRow(0);
+			if (row != null) {
+				cell = row.getCell(0);
+				elementsToWrite = validateUserContext(cell.toString(), token);
+				row.createCell(1).setCellValue(elementsToWrite[0]);
+				row.createCell(2).setCellValue(elementsToWrite[1]);
+			}
+		
+		FileOutputStream os = new FileOutputStream(excelFilePath);
+		workbook.write(os);
+		// Close workbook, OutputStream and Excel file to prevent leak
+		os.close();
+		workbook.close();
+		inputStream.close();
+	}
+	
+	public static void main(String[] args) {
+		//validateUserContext("dhisinha", "c3Zvcm1hODphcG9sbG8=");
+		getUserIdFromExcel(path);
 	}
 
 }

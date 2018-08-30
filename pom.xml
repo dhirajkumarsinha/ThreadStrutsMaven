@@ -42,6 +42,12 @@
 			<artifactId>jettison</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.cisco.massmat</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>StrutsMavenD</finalName>
